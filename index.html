@@ -360,6 +360,14 @@ const MULTISELECT_OPTIONS = {
   'Services__clients': ['Meta Ads', 'Google Ads', 'SEO', 'Web Design', 'Branding', 'Content Creation', 'Email Marketing', 'Social Media Management']
 };
 
+// campos de fecha: se editan con un selector de fecha nativo, no texto libre
+const DATE_FIELDS = new Set([
+  'Publish Date__content',
+  'Due Date__tasks',
+  'Start Date__clients',
+  'Sent Date__approvals'
+]);
+
 // ---- helpers ----
 function val(v){ return (v === undefined || v === null || v === '') ? null : v; }
 function cell(v){ const x = val(v); return x === null ? '<span class="empty-cell">—</span>' : x; }
@@ -390,10 +398,12 @@ function editableCell(key, idValue, field, displayHtml, rawValue){
   const optKey = field + '__' + key;
   const opts = SELECT_OPTIONS[optKey];
   const multiOpts = MULTISELECT_OPTIONS[optKey];
+  const isDate = DATE_FIELDS.has(optKey);
   return `<span class="editable" data-key="${key}" data-id="${idValue}" data-field="${field}"
     data-raw="${(rawValue===null||rawValue===undefined?'':String(rawValue)).replace(/"/g,'&quot;')}"
     data-options="${opts ? opts.join('|') : ''}"
-    data-multi-options="${multiOpts ? multiOpts.join('|') : ''}">${displayHtml}</span>`;
+    data-multi-options="${multiOpts ? multiOpts.join('|') : ''}"
+    data-is-date="${isDate ? '1' : ''}">${displayHtml}</span>`;
 }
 
 function isOverdue(dateStr, status){
@@ -616,6 +626,11 @@ function startEdit(span){
       if (opt === rawValue) o.selected = true;
       field.appendChild(o);
     });
+  } else if (span.dataset.isDate === '1'){
+    field = document.createElement('input');
+    field.className = 'edit-input';
+    field.type = 'date';
+    field.value = rawValue ? String(rawValue).slice(0, 10) : '';
   } else {
     field = document.createElement('input');
     field.className = 'edit-input';
