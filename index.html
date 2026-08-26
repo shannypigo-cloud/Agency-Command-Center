@@ -186,6 +186,15 @@
         </div>
         <div id="dashTicker"></div>
         <div class="kpis" id="dashKpis"></div>
+
+        <div class="card" style="margin-bottom:24px;">
+          <h3>🧠 Asistente de marketing <span>· pregúntale lo que sea</span></h3>
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <input type="text" id="assistantInput" class="edit-input" style="max-width:none; flex:1;" placeholder="Ej: dame 3 ideas de caption para un post de remodelación de cocina">
+            <button id="assistantAskBtn" class="refresh-btn" style="white-space:nowrap;">Preguntar</button>
+          </div>
+          <div id="assistantAnswer" style="font-size:13.5px; line-height:1.6; white-space:pre-wrap;"></div>
+        </div>
         <div class="grid2">
           <div class="card"><h3>Clientes <span>· estado general</span></h3><div id="dashClients"></div></div>
           <div class="card"><h3>Tareas <span>· hoy y atrasadas</span></h3><div id="dashTasks"></div></div>
@@ -1314,6 +1323,38 @@ document.getElementById('saveApprovalBtn').addEventListener('click', async () =>
   } finally {
     btn.textContent = 'Guardar';
   }
+});
+
+// ---- asistente de marketing (IA) ----
+document.getElementById('assistantAskBtn').addEventListener('click', async () => {
+  const input = document.getElementById('assistantInput');
+  const answerEl = document.getElementById('assistantAnswer');
+  const question = input.value.trim();
+  if (!question) return;
+
+  const btn = document.getElementById('assistantAskBtn');
+  btn.textContent = 'Pensando…';
+  btn.disabled = true;
+  answerEl.textContent = '';
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'ask', question })
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'Error al preguntar');
+    answerEl.textContent = json.answer;
+  } catch (err) {
+    answerEl.innerHTML = `<span style="color:var(--bad);">No se pudo responder: ${err.message}</span>`;
+  } finally {
+    btn.textContent = 'Preguntar';
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('assistantInput').addEventListener('keydown', (ev) => {
+  if (ev.key === 'Enter') document.getElementById('assistantAskBtn').click();
 });
 
 // ---- nav ----
