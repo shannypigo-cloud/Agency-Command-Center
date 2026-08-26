@@ -195,8 +195,56 @@
       </section>
 
       <section class="view" id="contenido">
-        <div class="view-head"><div><h1>Parrilla de contenido</h1><p>Meta: mínimo 14 días planificados por cliente</p></div></div>
+        <div class="view-head">
+          <div><h1>Parrilla de contenido</h1><p>Meta: mínimo 14 días planificados por cliente</p></div>
+          <button id="addContentBtn" class="refresh-btn">+ Agregar contenido</button>
+        </div>
         <div class="pipeline" id="contentPipeline"></div>
+
+        <div id="addContentForm" style="display:none; margin:20px 0; background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px;">
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:11px; color:#8A8371; display:block; margin-bottom:4px;">Cliente</label>
+              <select id="newContentClient" class="edit-select" style="max-width:none;"></select>
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8A8371; display:block; margin-bottom:4px;">Fecha de publicación</label>
+              <input type="date" id="newContentDate" class="edit-input" style="max-width:none;">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8A8371; display:block; margin-bottom:4px;">Plataforma</label>
+              <input type="text" id="newContentPlatform" class="edit-input" style="max-width:none;" placeholder="Instagram + Facebook">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8A8371; display:block; margin-bottom:4px;">Tipo de contenido</label>
+              <input type="text" id="newContentType" class="edit-input" style="max-width:none;" placeholder="Reel, Carousel, Post...">
+            </div>
+            <div style="grid-column:1/-1;">
+              <label style="font-size:11px; color:#8A8371; display:block; margin-bottom:4px;">Tema / Título</label>
+              <input type="text" id="newContentTitle" class="edit-input" style="max-width:none;">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8A8371; display:block; margin-bottom:4px;">Estado</label>
+              <select id="newContentStatus" class="edit-select" style="max-width:none;">
+                <option>Idea</option><option>Copy</option><option>Diseño</option><option>Revisión</option>
+                <option>Cliente</option><option>Aprobado</option><option>Programado</option><option>Publicado</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8A8371; display:block; margin-bottom:4px;">Estado de aprobación</label>
+              <select id="newContentApproval" class="edit-select" style="max-width:none;">
+                <option>Pending</option><option>Approved</option><option>Needs changes</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button id="saveContentBtn" class="refresh-btn">Guardar</button>
+            <button id="cancelContentBtn" class="refresh-btn" style="border-color:var(--line); color:#8A8371;">Cancelar</button>
+          </div>
+          <div id="addContentError" class="save-error" style="display:none;"></div>
+        </div>
+
+        <div class="table-wrap"><table id="contentTable"></table></div>
       </section>
 
       <section class="view" id="tareas">
@@ -303,6 +351,7 @@ const SELECT_OPTIONS = {
   'Status__campaigns': ['Active', 'Paused', 'Ended'],
   'Health__campaigns': ['🟢 Healthy', '🟡 Watch', '🔴 Attention'],
   'Approval Status__content': ['Pending', 'Approved', 'Needs changes'],
+  'Status__content': ['Idea', 'Copy', 'Diseño', 'Revisión', 'Cliente', 'Aprobado', 'Programado', 'Publicado'],
   'Status__approvals': ['Waiting', 'Approved', 'Rejected']
 };
 
@@ -470,6 +519,26 @@ function renderContent(){
     html += `<div class="pipe-col"><h4>Sin estado</h4>${other.map(c => `<div class="pipe-card"><div class="pc-client">${(c['Client Name']||'').toUpperCase()}</div>${cell(c['Topic / Title'])}</div>`).join('')}</div>`;
   }
   document.getElementById('contentPipeline').innerHTML = content.length ? html : '<div class="empty-view">Todavía no hay contenido en la parrilla.</div>';
+
+  // tabla editable debajo del kanban — control total de cada campo
+  const rows = content.map(c => {
+    const id = c['Content ID'];
+    return `<tr>
+      <td>${cell(id)}</td>
+      <td>${editableCell('content', id, 'Client Name', cell(c['Client Name']), c['Client Name'])}</td>
+      <td>${editableCell('content', id, 'Publish Date', cell(formatDate(c['Publish Date'])), c['Publish Date'])}</td>
+      <td>${editableCell('content', id, 'Platform', cell(c.Platform), c.Platform)}</td>
+      <td>${editableCell('content', id, 'Content Type', cell(c['Content Type']), c['Content Type'])}</td>
+      <td>${editableCell('content', id, 'Topic / Title', cell(c['Topic / Title']), c['Topic / Title'])}</td>
+      <td>${editableCell('content', id, 'Status', `<span class="pill neutral">${cell(c.Status)}</span>`, c.Status)}</td>
+      <td>${editableCell('content', id, 'Approval Status', cell(c['Approval Status']), c['Approval Status'])}</td>
+      <td>${editableCell('content', id, 'Notes', cell(c.Notes), c.Notes)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('contentTable').innerHTML = `
+    <tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Plataforma</th><th>Tipo</th><th>Tema</th><th>Estado</th><th>Aprobación</th><th>Notas</th></tr>
+    ${rows || '<tr><td colspan="9" class="empty-view">Sin contenido todavía — usa "+ Agregar contenido".</td></tr>'}
+  `;
 }
 
 function renderTasks(){
@@ -590,6 +659,93 @@ async function saveField(span, newValue, previousHtml){
     span.innerHTML = previousHtml + `<div class="save-error">No se guardó: ${err.message}</div>`;
   }
 }
+
+// ---- agregar filas nuevas (genérico) ----
+async function insertRow(sheetName, idColumn, idPrefix, values){
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'insert', sheetName, idColumn, idPrefix, values })
+  });
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || 'Error al guardar');
+  return json;
+}
+
+// ---- formulario: agregar contenido ----
+function populateNewContentClientOptions(){
+  const sel = document.getElementById('newContentClient');
+  if (!sel) return;
+  const clients = STATE.clients || [];
+  sel.innerHTML = clients.map(c => `<option value="${c['Client Name']}">${c['Client Name']}</option>`).join('')
+    || '<option value="">Sin clientes</option>';
+}
+
+document.getElementById('addContentBtn').addEventListener('click', () => {
+  populateNewContentClientOptions();
+  document.getElementById('addContentForm').style.display = 'block';
+  document.getElementById('addContentError').style.display = 'none';
+});
+
+document.getElementById('cancelContentBtn').addEventListener('click', () => {
+  document.getElementById('addContentForm').style.display = 'none';
+});
+
+document.getElementById('saveContentBtn').addEventListener('click', async () => {
+  const errorEl = document.getElementById('addContentError');
+  errorEl.style.display = 'none';
+
+  const clientName = document.getElementById('newContentClient').value;
+  const title = document.getElementById('newContentTitle').value.trim();
+  if (!clientName || !title){
+    errorEl.textContent = 'Elige un cliente y escribe un tema/título antes de guardar.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const client = (STATE.clients || []).find(c => c['Client Name'] === clientName);
+  const btn = document.getElementById('saveContentBtn');
+  btn.textContent = 'Guardando…';
+
+  try {
+    const result = await insertRow('Content', 'Content ID', 'CON', {
+      'Client ID': client ? client['Client ID'] : '',
+      'Client Name': clientName,
+      'Publish Date': document.getElementById('newContentDate').value,
+      'Platform': document.getElementById('newContentPlatform').value.trim(),
+      'Content Type': document.getElementById('newContentType').value.trim(),
+      'Topic / Title': title,
+      'Status': document.getElementById('newContentStatus').value,
+      'Approval Status': document.getElementById('newContentApproval').value,
+      'Drive Link': '',
+      'Notes': ''
+    });
+
+    // reflejar en STATE local sin esperar otro fetch completo
+    STATE.content = STATE.content || [];
+    STATE.content.push({
+      'Content ID': result.newId,
+      'Client ID': client ? client['Client ID'] : '',
+      'Client Name': clientName,
+      'Publish Date': document.getElementById('newContentDate').value,
+      'Platform': document.getElementById('newContentPlatform').value.trim(),
+      'Content Type': document.getElementById('newContentType').value.trim(),
+      'Topic / Title': title,
+      'Status': document.getElementById('newContentStatus').value,
+      'Approval Status': document.getElementById('newContentApproval').value,
+      'Drive Link': '',
+      'Notes': ''
+    });
+
+    document.getElementById('addContentForm').style.display = 'none';
+    ['newContentDate','newContentPlatform','newContentType','newContentTitle'].forEach(id => document.getElementById(id).value = '');
+    renderAll();
+  } catch (err) {
+    errorEl.textContent = 'No se guardó: ' + err.message;
+    errorEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Guardar';
+  }
+});
 
 // ---- nav ----
 document.querySelectorAll('.tab[data-view]').forEach(btn=>{
