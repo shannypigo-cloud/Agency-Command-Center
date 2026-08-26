@@ -355,6 +355,11 @@ const SELECT_OPTIONS = {
   'Status__approvals': ['Waiting', 'Approved', 'Rejected']
 };
 
+// campos que se editan como checkboxes de selección múltiple (guardan "A + B + C")
+const MULTISELECT_OPTIONS = {
+  'Services__clients': ['Meta Ads', 'Google Ads', 'SEO', 'Web Design', 'Branding', 'Content Creation', 'Email Marketing', 'Social Media Management']
+};
+
 // ---- helpers ----
 function val(v){ return (v === undefined || v === null || v === '') ? null : v; }
 function cell(v){ const x = val(v); return x === null ? '<span class="empty-cell">—</span>' : x; }
@@ -384,9 +389,11 @@ function formatDate(v){
 function editableCell(key, idValue, field, displayHtml, rawValue){
   const optKey = field + '__' + key;
   const opts = SELECT_OPTIONS[optKey];
+  const multiOpts = MULTISELECT_OPTIONS[optKey];
   return `<span class="editable" data-key="${key}" data-id="${idValue}" data-field="${field}"
     data-raw="${(rawValue===null||rawValue===undefined?'':String(rawValue)).replace(/"/g,'&quot;')}"
-    data-options="${opts ? opts.join('|') : ''}">${displayHtml}</span>`;
+    data-options="${opts ? opts.join('|') : ''}"
+    data-multi-options="${multiOpts ? multiOpts.join('|') : ''}">${displayHtml}</span>`;
 }
 
 function isOverdue(dateStr, status){
@@ -584,14 +591,21 @@ function renderCampaigns(){
 // ---- edición en vivo ----
 document.addEventListener('click', function(e){
   const span = e.target.closest('.editable');
-  if (!span || span.querySelector('input,select')) return;
+  if (!span || span.querySelector('input,select,.multi-panel')) return;
   startEdit(span);
 });
 
 function startEdit(span){
   const rawValue = span.dataset.raw || '';
   const options = span.dataset.options ? span.dataset.options.split('|') : null;
+  const multiOptions = span.dataset.multiOptions ? span.dataset.multiOptions.split('|') : null;
   const original = span.innerHTML;
+
+  if (multiOptions && multiOptions.length){
+    startMultiEdit(span, multiOptions, rawValue, original);
+    return;
+  }
+
   let field;
   if (options){
     field = document.createElement('select');
@@ -624,6 +638,59 @@ function startEdit(span){
   field.addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') field.blur();
     if (ev.key === 'Escape'){ field.removeEventListener('blur', commit); cancel(); }
+  });
+}
+
+// dropdown de checkboxes para campos de selección múltiple (ej. Servicios)
+function startMultiEdit(span, options, rawValue, original){
+  const selected = new Set(
+    rawValue.split(/[,+]/).map(s => s.trim()).filter(Boolean)
+  );
+
+  const panel = document.createElement('div');
+  panel.className = 'multi-panel';
+  panel.style.cssText = 'position:absolute; z-index:20; background:#fff; border:1px solid var(--folder); border-radius:6px; padding:8px; box-shadow:0 4px 12px rgba(0,0,0,.12); min-width:200px;';
+
+  options.forEach(opt => {
+    const row = document.createElement('label');
+    row.style.cssText = 'display:flex; align-items:center; gap:6px; font-size:12.5px; padding:4px 2px; cursor:pointer;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = opt;
+    cb.checked = selected.has(opt);
+    row.appendChild(cb);
+    row.appendChild(document.createTextNode(opt));
+    panel.appendChild(row);
+  });
+
+  const actions = document.createElement('div');
+  actions.style.cssText = 'display:flex; gap:6px; margin-top:8px; border-top:1px solid var(--line); padding-top:8px;';
+  const saveBtn = document.createElement('button');
+  saveBtn.textContent = 'Guardar';
+  saveBtn.className = 'refresh-btn';
+  saveBtn.style.cssText = 'font-size:11px; padding:4px 8px;';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Cancelar';
+  cancelBtn.className = 'refresh-btn';
+  cancelBtn.style.cssText = 'font-size:11px; padding:4px 8px; border-color:var(--line); color:#8A8371;';
+  actions.appendChild(saveBtn);
+  actions.appendChild(cancelBtn);
+  panel.appendChild(actions);
+
+  span.style.position = 'relative';
+  span.innerHTML = '';
+  span.appendChild(panel);
+
+  saveBtn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    const chosen = Array.from(panel.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.value);
+    const newValue = chosen.join(' + ');
+    if (newValue === rawValue){ span.innerHTML = original; return; }
+    saveField(span, newValue, original);
+  });
+  cancelBtn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    span.innerHTML = original;
   });
 }
 
