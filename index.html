@@ -160,6 +160,7 @@
     <button class="tab" data-view="contenido"><span class="num">02</span> <span>Contenido</span></button>
     <button class="tab" data-view="tareas"><span class="num">03</span> <span>Tareas</span></button>
     <button class="tab" data-view="campanas"><span class="num">04</span> <span>Campañas</span></button>
+    <button class="tab" data-view="aprobaciones"><span class="num">05</span> <span>Aprobaciones</span></button>
     <div class="rail-foot" id="railFoot">CARGANDO…</div>
   </nav>
 
@@ -292,17 +293,139 @@
       <section class="view" id="tareas">
         <div class="view-head">
           <div><h1>Tareas</h1><p>Todas las pendientes, ordenadas por prioridad</p></div>
-          <button class="refresh-btn refresh-trigger" title="Actualizar datos"><span class="icon">↻</span> Actualizar</button>
+          <div style="display:flex; gap:8px;">
+            <button class="refresh-btn refresh-trigger" title="Actualizar datos"><span class="icon">↻</span> Actualizar</button>
+            <button id="addTaskBtn" class="refresh-btn">+ Agregar tarea</button>
+          </div>
         </div>
+
+        <div id="addTaskForm" style="display:none; margin:0 0 20px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px;">
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Cliente</label>
+              <select id="newTaskClient" class="edit-select" style="max-width:none;"></select>
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Fecha límite</label>
+              <input type="date" id="newTaskDate" class="edit-input" style="max-width:none;">
+            </div>
+            <div style="grid-column:1/-1;">
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Tarea</label>
+              <input type="text" id="newTaskTitle" class="edit-input" style="max-width:none;">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Prioridad</label>
+              <select id="newTaskPriority" class="edit-select" style="max-width:none;">
+                <option>Medium</option><option>Low</option><option>High</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Estado</label>
+              <select id="newTaskStatus" class="edit-select" style="max-width:none;">
+                <option>To Do</option><option>In Progress</option><option>Waiting</option><option>Done</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button id="saveTaskBtn" class="refresh-btn">Guardar</button>
+            <button id="cancelTaskBtn" class="refresh-btn" style="border-color:var(--line); color:#8B7BAE;">Cancelar</button>
+          </div>
+          <div id="addTaskError" class="save-error" style="display:none;"></div>
+        </div>
+
         <div class="table-wrap"><table id="tasksTable"></table></div>
       </section>
 
       <section class="view" id="campanas">
         <div class="view-head">
           <div><h1>Campañas</h1><p>Monitoreo semanal · no reemplaza Ads Manager</p></div>
-          <button class="refresh-btn refresh-trigger" title="Actualizar datos"><span class="icon">↻</span> Actualizar</button>
+          <div style="display:flex; gap:8px;">
+            <button class="refresh-btn refresh-trigger" title="Actualizar datos"><span class="icon">↻</span> Actualizar</button>
+            <button id="addCampaignBtn" class="refresh-btn">+ Agregar campaña</button>
+          </div>
         </div>
+
+        <div id="addCampaignForm" style="display:none; margin:0 0 20px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px;">
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Cliente</label>
+              <select id="newCampaignClient" class="edit-select" style="max-width:none;"></select>
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Nombre de campaña</label>
+              <input type="text" id="newCampaignName" class="edit-input" style="max-width:none;">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Plataforma</label>
+              <input type="text" id="newCampaignPlatform" class="edit-input" style="max-width:none;" placeholder="Meta Ads, Google Ads...">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Presupuesto mensual</label>
+              <input type="number" id="newCampaignBudget" class="edit-input" style="max-width:none;" placeholder="0.00">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Costo meta</label>
+              <input type="number" id="newCampaignTarget" class="edit-input" style="max-width:none;" placeholder="0.00">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Estado de salud</label>
+              <select id="newCampaignHealth" class="edit-select" style="max-width:none;">
+                <option>🟢 Healthy</option><option>🟡 Watch</option><option>🔴 Attention</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button id="saveCampaignBtn" class="refresh-btn">Guardar</button>
+            <button id="cancelCampaignBtn" class="refresh-btn" style="border-color:var(--line); color:#8B7BAE;">Cancelar</button>
+          </div>
+          <div id="addCampaignError" class="save-error" style="display:none;"></div>
+        </div>
+
         <div class="table-wrap"><table id="campaignsTable"></table></div>
+      </section>
+
+      <section class="view" id="aprobaciones">
+        <div class="view-head">
+          <div><h1>Aprobaciones</h1><p>Regla: 0-2 días normal · 3 días seguimiento · 4+ días requiere atención</p></div>
+          <div style="display:flex; gap:8px;">
+            <button class="refresh-btn refresh-trigger" title="Actualizar datos"><span class="icon">↻</span> Actualizar</button>
+            <button id="addApprovalBtn" class="refresh-btn">+ Agregar aprobación</button>
+          </div>
+        </div>
+
+        <div id="addApprovalForm" style="display:none; margin:0 0 20px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px;">
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Cliente</label>
+              <select id="newApprovalClient" class="edit-select" style="max-width:none;"></select>
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Fecha enviado</label>
+              <input type="date" id="newApprovalDate" class="edit-input" style="max-width:none;">
+            </div>
+            <div style="grid-column:1/-1;">
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Qué está esperando aprobación</label>
+              <input type="text" id="newApprovalItem" class="edit-input" style="max-width:none;">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Tipo</label>
+              <input type="text" id="newApprovalType" class="edit-input" style="max-width:none;" placeholder="Contenido, campaña, diseño...">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#8B7BAE; display:block; margin-bottom:4px;">Estado</label>
+              <select id="newApprovalStatus" class="edit-select" style="max-width:none;">
+                <option>Waiting</option><option>Approved</option><option>Rejected</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button id="saveApprovalBtn" class="refresh-btn">Guardar</button>
+            <button id="cancelApprovalBtn" class="refresh-btn" style="border-color:var(--line); color:#8B7BAE;">Cancelar</button>
+          </div>
+          <div id="addApprovalError" class="save-error" style="display:none;"></div>
+        </div>
+
+        <div class="table-wrap"><table id="approvalsTable"></table></div>
       </section>
     </div>
   </main>
@@ -483,6 +606,7 @@ function renderAll(){
   renderContent();
   renderTasks();
   renderCampaigns();
+  renderApprovals();
 }
 
 function renderDashboard(){
@@ -599,11 +723,12 @@ function renderContent(){
       <td>${editableCell('content', id, 'Status', `<span class="pill neutral">${cell(c.Status)}</span>`, c.Status)}</td>
       <td>${editableCell('content', id, 'Approval Status', cell(c['Approval Status']), c['Approval Status'])}</td>
       <td>${editableCell('content', id, 'Notes', cell(c.Notes), c.Notes)}</td>
+      <td><button class="delete-btn" data-key="content" data-id="${id}" data-label="${c['Topic / Title'] || id}" title="Eliminar contenido">🗑</button></td>
     </tr>`;
   }).join('');
   document.getElementById('contentTable').innerHTML = `
-    <tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Plataforma</th><th>Tipo</th><th>Tema</th><th>Estado</th><th>Aprobación</th><th>Notas</th></tr>
-    ${rows || '<tr><td colspan="9" class="empty-view">Sin contenido todavía — usa "+ Agregar contenido".</td></tr>'}
+    <tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Plataforma</th><th>Tipo</th><th>Tema</th><th>Estado</th><th>Aprobación</th><th>Notas</th><th></th></tr>
+    ${rows || '<tr><td colspan="10" class="empty-view">Sin contenido todavía — usa "+ Agregar contenido".</td></tr>'}
   `;
 }
 
@@ -613,16 +738,17 @@ function renderTasks(){
     const overdue = isOverdue(t['Due Date'], t.Status);
     const id = t['Task ID'];
     return `<tr>
-      <td>${cell(t['Client Name'])}</td>
-      <td>${cell(t.Task)}</td>
-      <td>${cell(formatDate(t['Due Date']))}</td>
+      <td>${editableCell('tasks', id, 'Client Name', cell(t['Client Name']), t['Client Name'])}</td>
+      <td>${editableCell('tasks', id, 'Task', cell(t.Task), t.Task)}</td>
+      <td>${editableCell('tasks', id, 'Due Date', cell(formatDate(t['Due Date'])), t['Due Date'])}</td>
       <td>${editableCell('tasks', id, 'Priority', cell(t.Priority), t.Priority)}</td>
       <td>${editableCell('tasks', id, 'Status', `<span class="pill ${overdue?'bad':'neutral'}">${overdue?'Atrasada':cell(t.Status)}</span>`, t.Status)}</td>
+      <td><button class="delete-btn" data-key="tasks" data-id="${id}" data-label="${t.Task || id}" title="Eliminar tarea">🗑</button></td>
     </tr>`;
   }).join('');
   document.getElementById('tasksTable').innerHTML = `
-    <tr><th>Cliente</th><th>Tarea</th><th>Fecha</th><th>Prioridad</th><th>Estado</th></tr>
-    ${rows || '<tr><td colspan="5" class="empty-view">Sin tareas registradas.</td></tr>'}
+    <tr><th>Cliente</th><th>Tarea</th><th>Fecha</th><th>Prioridad</th><th>Estado</th><th></th></tr>
+    ${rows || '<tr><td colspan="6" class="empty-view">Sin tareas todavía — usa "+ Agregar tarea".</td></tr>'}
   `;
 }
 
@@ -631,19 +757,42 @@ function renderCampaigns(){
   const rows = campaigns.map(c => {
     const id = c['Campaign ID'];
     return `<tr>
-    <td>${cell(c['Client Name'])}</td>
-    <td>${cell(c['Campaign Name'])}</td>
+    <td>${editableCell('campaigns', id, 'Client Name', cell(c['Client Name']), c['Client Name'])}</td>
+    <td>${editableCell('campaigns', id, 'Campaign Name', cell(c['Campaign Name']), c['Campaign Name'])}</td>
     <td>${editableCell('campaigns', id, 'Monthly Budget', formatMoney(c['Monthly Budget']), c['Monthly Budget'])}</td>
     <td>${editableCell('campaigns', id, 'Spend', formatMoney(c.Spend), c.Spend)}</td>
     <td>${editableCell('campaigns', id, 'Results', cell(c.Results), c.Results)}</td>
     <td>${c['Cost per Result'] ? formatMoney(Number(c['Cost per Result']).toFixed(2)) : '<span class="empty-cell">—</span>'}</td>
     <td>${editableCell('campaigns', id, 'Target Cost', formatMoney(c['Target Cost']), c['Target Cost'])}</td>
     <td>${editableCell('campaigns', id, 'Health', `<span class="pill ${healthClass(c.Health)}">${cell(c.Health)}</span>`, c.Health)}</td>
+    <td><button class="delete-btn" data-key="campaigns" data-id="${id}" data-label="${c['Campaign Name'] || id}" title="Eliminar campaña">🗑</button></td>
   </tr>`;
   }).join('');
   document.getElementById('campaignsTable').innerHTML = `
-    <tr><th>Cliente</th><th>Campaña</th><th>Budget</th><th>Spend</th><th>Resultados</th><th>Costo/resultado</th><th>Meta</th><th>Estado</th></tr>
-    ${rows || '<tr><td colspan="8" class="empty-view">Sin campañas registradas.</td></tr>'}
+    <tr><th>Cliente</th><th>Campaña</th><th>Budget</th><th>Spend</th><th>Resultados</th><th>Costo/resultado</th><th>Meta</th><th>Estado</th><th></th></tr>
+    ${rows || '<tr><td colspan="9" class="empty-view">Sin campañas todavía — usa "+ Agregar campaña".</td></tr>'}
+  `;
+}
+
+function renderApprovals(){
+  const approvals = STATE.approvals || [];
+  const rows = approvals.map(a => {
+    const id = a['Approval ID'];
+    const days = Number(a['Days Waiting']) || 0;
+    return `<tr>
+    <td>${editableCell('approvals', id, 'Client Name', cell(a['Client Name']), a['Client Name'])}</td>
+    <td>${editableCell('approvals', id, 'Item', cell(a.Item), a.Item)}</td>
+    <td>${editableCell('approvals', id, 'Type', cell(a.Type), a.Type)}</td>
+    <td>${editableCell('approvals', id, 'Sent Date', cell(formatDate(a['Sent Date'])), a['Sent Date'])}</td>
+    <td>${cell(a['Days Waiting'])}</td>
+    <td><span class="pill ${approvalClass(days)}">${days >= 4 ? 'Atención' : days === 3 ? 'Seguimiento' : 'Normal'}</span></td>
+    <td>${editableCell('approvals', id, 'Status', cell(a.Status), a.Status)}</td>
+    <td><button class="delete-btn" data-key="approvals" data-id="${id}" data-label="${a.Item || id}" title="Eliminar aprobación">🗑</button></td>
+  </tr>`;
+  }).join('');
+  document.getElementById('approvalsTable').innerHTML = `
+    <tr><th>Cliente</th><th>Qué</th><th>Tipo</th><th>Enviado</th><th>Días esperando</th><th>Semáforo</th><th>Estado</th><th></th></tr>
+    ${rows || '<tr><td colspan="8" class="empty-view">Sin aprobaciones pendientes — usa "+ Agregar aprobación".</td></tr>'}
   `;
 }
 
@@ -970,6 +1119,194 @@ document.getElementById('saveClientBtn').addEventListener('click', async () => {
 
     document.getElementById('addClientForm').style.display = 'none';
     ['newClientName','newClientContact','newClientFee','newClientBudget','newClientFolder'].forEach(id => document.getElementById(id).value = '');
+    renderAll();
+  } catch (err) {
+    errorEl.textContent = 'No se guardó: ' + err.message;
+    errorEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Guardar';
+  }
+});
+
+// ---- formulario: agregar tarea ----
+function populateNewTaskClientOptions(){
+  const sel = document.getElementById('newTaskClient');
+  if (!sel) return;
+  const clients = STATE.clients || [];
+  sel.innerHTML = clients.map(c => `<option value="${c['Client Name']}">${c['Client Name']}</option>`).join('')
+    || '<option value="">Sin clientes</option>';
+}
+
+document.getElementById('addTaskBtn').addEventListener('click', () => {
+  populateNewTaskClientOptions();
+  document.getElementById('addTaskForm').style.display = 'block';
+  document.getElementById('addTaskError').style.display = 'none';
+});
+
+document.getElementById('cancelTaskBtn').addEventListener('click', () => {
+  document.getElementById('addTaskForm').style.display = 'none';
+});
+
+document.getElementById('saveTaskBtn').addEventListener('click', async () => {
+  const errorEl = document.getElementById('addTaskError');
+  errorEl.style.display = 'none';
+
+  const clientName = document.getElementById('newTaskClient').value;
+  const title = document.getElementById('newTaskTitle').value.trim();
+  if (!clientName || !title){
+    errorEl.textContent = 'Elige un cliente y escribe la tarea antes de guardar.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const client = (STATE.clients || []).find(c => c['Client Name'] === clientName);
+  const btn = document.getElementById('saveTaskBtn');
+  btn.textContent = 'Guardando…';
+
+  const values = {
+    'Client ID': client ? client['Client ID'] : '',
+    'Client Name': clientName,
+    'Task': title,
+    'Due Date': document.getElementById('newTaskDate').value,
+    'Priority': document.getElementById('newTaskPriority').value,
+    'Status': document.getElementById('newTaskStatus').value
+  };
+
+  try {
+    const result = await insertRow('Tasks', 'Task ID', 'T', values);
+    STATE.tasks = STATE.tasks || [];
+    STATE.tasks.push(Object.assign({ 'Task ID': result.newId }, values));
+
+    document.getElementById('addTaskForm').style.display = 'none';
+    ['newTaskDate','newTaskTitle'].forEach(id => document.getElementById(id).value = '');
+    renderAll();
+  } catch (err) {
+    errorEl.textContent = 'No se guardó: ' + err.message;
+    errorEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Guardar';
+  }
+});
+
+// ---- formulario: agregar campaña ----
+function populateNewCampaignClientOptions(){
+  const sel = document.getElementById('newCampaignClient');
+  if (!sel) return;
+  const clients = STATE.clients || [];
+  sel.innerHTML = clients.map(c => `<option value="${c['Client Name']}">${c['Client Name']}</option>`).join('')
+    || '<option value="">Sin clientes</option>';
+}
+
+document.getElementById('addCampaignBtn').addEventListener('click', () => {
+  populateNewCampaignClientOptions();
+  document.getElementById('addCampaignForm').style.display = 'block';
+  document.getElementById('addCampaignError').style.display = 'none';
+});
+
+document.getElementById('cancelCampaignBtn').addEventListener('click', () => {
+  document.getElementById('addCampaignForm').style.display = 'none';
+});
+
+document.getElementById('saveCampaignBtn').addEventListener('click', async () => {
+  const errorEl = document.getElementById('addCampaignError');
+  errorEl.style.display = 'none';
+
+  const clientName = document.getElementById('newCampaignClient').value;
+  const campaignName = document.getElementById('newCampaignName').value.trim();
+  if (!clientName || !campaignName){
+    errorEl.textContent = 'Elige un cliente y escribe el nombre de la campaña antes de guardar.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const client = (STATE.clients || []).find(c => c['Client Name'] === clientName);
+  const btn = document.getElementById('saveCampaignBtn');
+  btn.textContent = 'Guardando…';
+
+  const values = {
+    'Client ID': client ? client['Client ID'] : '',
+    'Client Name': clientName,
+    'Campaign Name': campaignName,
+    'Platform': document.getElementById('newCampaignPlatform').value.trim(),
+    'Monthly Budget': document.getElementById('newCampaignBudget').value,
+    'Spend': 0,
+    'Results': 0,
+    'Cost per Result': '',
+    'Target Cost': document.getElementById('newCampaignTarget').value,
+    'Health': document.getElementById('newCampaignHealth').value,
+    'Last Updated': todayStr()
+  };
+
+  try {
+    const result = await insertRow('Campaigns', 'Campaign ID', 'CAM', values);
+    STATE.campaigns = STATE.campaigns || [];
+    STATE.campaigns.push(Object.assign({ 'Campaign ID': result.newId }, values));
+
+    document.getElementById('addCampaignForm').style.display = 'none';
+    ['newCampaignName','newCampaignPlatform','newCampaignBudget','newCampaignTarget'].forEach(id => document.getElementById(id).value = '');
+    renderAll();
+  } catch (err) {
+    errorEl.textContent = 'No se guardó: ' + err.message;
+    errorEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Guardar';
+  }
+});
+
+// ---- formulario: agregar aprobación ----
+function populateNewApprovalClientOptions(){
+  const sel = document.getElementById('newApprovalClient');
+  if (!sel) return;
+  const clients = STATE.clients || [];
+  sel.innerHTML = clients.map(c => `<option value="${c['Client Name']}">${c['Client Name']}</option>`).join('')
+    || '<option value="">Sin clientes</option>';
+}
+
+document.getElementById('addApprovalBtn').addEventListener('click', () => {
+  populateNewApprovalClientOptions();
+  document.getElementById('addApprovalForm').style.display = 'block';
+  document.getElementById('addApprovalError').style.display = 'none';
+});
+
+document.getElementById('cancelApprovalBtn').addEventListener('click', () => {
+  document.getElementById('addApprovalForm').style.display = 'none';
+});
+
+document.getElementById('saveApprovalBtn').addEventListener('click', async () => {
+  const errorEl = document.getElementById('addApprovalError');
+  errorEl.style.display = 'none';
+
+  const clientName = document.getElementById('newApprovalClient').value;
+  const item = document.getElementById('newApprovalItem').value.trim();
+  if (!clientName || !item){
+    errorEl.textContent = 'Elige un cliente y describe qué está esperando aprobación.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const client = (STATE.clients || []).find(c => c['Client Name'] === clientName);
+  const sentDate = document.getElementById('newApprovalDate').value || todayStr();
+  const daysWaiting = Math.max(0, Math.floor((new Date(todayStr()) - new Date(sentDate)) / 86400000));
+  const btn = document.getElementById('saveApprovalBtn');
+  btn.textContent = 'Guardando…';
+
+  const values = {
+    'Client ID': client ? client['Client ID'] : '',
+    'Client Name': clientName,
+    'Item': item,
+    'Type': document.getElementById('newApprovalType').value.trim(),
+    'Sent Date': sentDate,
+    'Status': document.getElementById('newApprovalStatus').value,
+    'Days Waiting': daysWaiting
+  };
+
+  try {
+    const result = await insertRow('Approvals', 'Approval ID', 'AP', values);
+    STATE.approvals = STATE.approvals || [];
+    STATE.approvals.push(Object.assign({ 'Approval ID': result.newId }, values));
+
+    document.getElementById('addApprovalForm').style.display = 'none';
+    ['newApprovalItem','newApprovalType','newApprovalDate'].forEach(id => document.getElementById(id).value = '');
     renderAll();
   } catch (err) {
     errorEl.textContent = 'No se guardó: ' + err.message;
